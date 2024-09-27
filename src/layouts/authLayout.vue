@@ -92,13 +92,12 @@
   </q-layout>
 </template>
 <script setup lang="ts">
-import { ref,onMounted } from 'vue'
+import { ref,onMounted,onUnmounted } from 'vue'
 import { useAuthStore } from 'src/stores/authStore';
 import { authUserInfo } from 'src/components/models';
 import { useRouter } from 'vue-router';
 import { getImage, logout } from 'src/services/api.services';
 import { useQuasar } from 'quasar';
-
 const $q = useQuasar()
 const router = useRouter()
 const user_info = ref<authUserInfo | null>(null)

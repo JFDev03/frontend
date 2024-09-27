@@ -18,7 +18,7 @@
   </template>
   
   <script setup lang="ts">
-  import {ref,onMounted} from 'vue'
+  import {ref,onMounted,onUnmounted} from 'vue'
   import bookInfoComponent from '../components/card/bookInfoComponent.vue';
   import { useRouter,useRoute } from 'vue-router';
   import {borrowBook, getBook} from 'src/services/api.services'

@@ -32,12 +32,26 @@ export const useAuthStore = defineStore('auth', () => {
             return null; // Return null if parsing fails
         }
     };
-    
+    const setAccessToken =(token:string)=>{
+        localStorage.setItem('accessToken', token);
+    }
+    const setUserAuth = (user:string)=>{
+        localStorage.setItem('user', user);
+
+    }
+    const clearStorage = ()=>{
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
+        localStorage.removeItem('user')
+    }
 
     return {
         setDependencies,
         getAccessToken,
         getRefreshToken,
-        getUserInfo
+        getUserInfo,
+        setAccessToken,
+        setUserAuth,
+        clearStorage
     };
 });

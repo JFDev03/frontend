@@ -2,29 +2,36 @@
     <div>
       <q-card class="my-card">
         <q-card-section class="row q-gutter-md">
-            <q-btn flat round color="red" icon="favorite" class="favorite-button" />
           <q-img
             class="col-12 col-md-5 col-lg-7"
-            src="https://cdn.quasar.dev/img/parallax1.jpg"
+            :src="getImage(props.book.book_image)"
             alt="Image"
           />
   
           <q-card-section class="col-12 col-md-6 col-lg-4">
-            <p>{{ lorem }}</p>
+            <p>{{ props.book.book_desc }}</p>
           </q-card-section>
         </q-card-section>
   
         <q-separator />
   
         <q-card-actions>
-          <div class="genre">Genre</div>
+          <div class="genre">{{ props.book.genre }}</div>
         </q-card-actions>
       </q-card>
     </div>
   </template>
   
   <script setup lang="ts">
-  const lorem = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
+ import { getImage } from 'src/services/api.services';
+import { BooksDataT } from '../models';
+  import { PropType } from 'vue';
+  const props = defineProps({
+    book: {
+      type:Object as PropType<BooksDataT>,
+        required: true
+    }
+  });
   </script>
   
   <style scoped>

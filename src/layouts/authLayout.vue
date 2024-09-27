@@ -22,15 +22,46 @@
             </p>
         </q-toolbar-title>
         <span v-if="user_info != null">
-          <q-avatar class="avatar">
-              <img src="../assets/sample User Avatar.png" alt="sample user avatar">
-          </q-avatar>
-          <p class="text-black">Unknown</p>
+          <q-btn-dropdown
+          class="text-black border-none"
+    >
+      <template v-slot:label>
+        <div class="row items-center no-wrap">
+          <q-icon left>
+            <q-avatar left class="avatar">
+                <img src="../assets/sample User Avatar.png" alt="sample user avatar" v-if="user_info.profile_picture === null">
+                <img :src="getImage(user_info.profile_picture)" alt="user Avatar" v-else>
+            </q-avatar>
+          </q-icon>
+        </div>
+      </template>
+
+      <div class="row no-wrap q-pa-md justify-center items-center">
+  <div class="column items-center text-center">
+    <q-avatar size="450%">
+      <img src="../assets/sample User Avatar.png" alt="sample user avatar" v-if="user_info.profile_picture === null">
+                <img :src="getImage(user_info.profile_picture)" alt="user Avatar" v-else>
+    </q-avatar>
+
+    <div class="text-subtitle1 q-mt-md q-mb-xs">{{ user_info.fullname }}</div>
+
+    <q-btn
+      color="primary"
+      label="Logout"
+      push
+      size="sm"
+      v-close-popup
+      @click="HandleLogout"
+    />
+  </div>
+</div>
+
+    </q-btn-dropdown>
         </span>
         <span v-else>
           <div class="routes text-black">
             <router-link to="/login" class="common-route">Login</router-link>
-            /
+            <span class="display">/</span>
             <router-link to="/registration" class="common-route">Create an Account</router-link>
           </div>
         </span>
@@ -44,59 +75,12 @@
       class="bg-grey-8"
     >
       <q-list dark>
-        <q-item-label header>Essential Links</q-item-label>
-        <q-item clickable target="_blank" rel="noopener" href="https://quasar.dev">
+        <q-item clickable class="links" to="/borrowedBooks">
           <q-item-section avatar>
-            <q-icon name="school" />
+            <q-icon name="book" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Docs</q-item-label>
-            <q-item-label caption>https://quasar.dev</q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item clickable target="_blank" rel="noopener" href="https://github.quasar.dev">
-          <q-item-section avatar>
-            <q-icon name="code" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>GitHub</q-item-label>
-            <q-item-label caption>github.com/quasarframework</q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item clickable target="_blank" rel="noopener" href="http://chat.quasar.dev">
-          <q-item-section avatar>
-            <q-icon name="chat" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Discord Chat Channel</q-item-label>
-            <q-item-label caption>https://chat.quasar.dev</q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item clickable target="_blank" rel="noopener" href="https://forum.quasar.dev">
-          <q-item-section avatar>
-            <q-icon name="record_voice_over" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Forum</q-item-label>
-            <q-item-label caption>https://forum.quasar.dev</q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item clickable target="_blank" rel="noopener" href="https://twitter.quasar.dev">
-          <q-item-section avatar>
-            <q-icon name="rss_feed" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Twitter</q-item-label>
-            <q-item-label caption>@quasarframework</q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item clickable target="_blank" rel="noopener" href="https://facebook.quasar.dev">
-          <q-item-section avatar>
-            <q-icon name="public" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Facebook</q-item-label>
-            <q-item-label caption>@QuasarFramework</q-item-label>
+            <q-item-label>Borrowed Books</q-item-label>
           </q-item-section>
         </q-item>
       </q-list>
@@ -112,7 +96,10 @@ import { ref,onMounted } from 'vue'
 import { useAuthStore } from 'src/stores/authStore';
 import { authUserInfo } from 'src/components/models';
 import { useRouter } from 'vue-router';
+import { getImage, logout } from 'src/services/api.services';
+import { useQuasar } from 'quasar';
 
+const $q = useQuasar()
 const router = useRouter()
 const user_info = ref<authUserInfo | null>(null)
 
@@ -130,6 +117,27 @@ const goHome = ()=>{
 onMounted(()=>{
   user_info.value = authStore.getUserInfo() || null
 })
+
+const HandleLogout = async () => {
+  await logout().then(response => {
+    if(response){
+      $q.notify({
+          type:'positive',
+          message:response.data.message
+          })
+          authStore.setDependencies(JSON.stringify(response.data.user),response.data.accessToken,response.data.refreshToken)
+          router.push('/').then(() => {
+    window.location.reload();
+  });
+    }
+  }).catch(err =>{
+    $q.notify({
+          type:'negative',
+          message:'error login'
+        })
+      console.log(err)
+  })
+}
 </script>
 <style scoped>
 .head-font{
@@ -153,11 +161,27 @@ onMounted(()=>{
   font-weight: 700;
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
+.border-none{
+  border: none;
+  text-decoration: none;
+}
 .common-route:hover{
   text-shadow: 0 0 10px black;
 }
 .routes{
   margin-right: 10%;
+}
+@media screen and (max-width: 780px) {
+  .routes{
+  display: flex;
+  flex-direction: column;
+}
+.display{
+  display: none;
+}
+}
+.links{
+  margin-top: 30%;
 }
 .router-link-exact-active{
   text-shadow: 0 0 10px #068399;

@@ -5,11 +5,12 @@
         <q-breadcrumbs-el label="books" />
         <q-breadcrumbs-el label="Info" />
       </q-breadcrumbs>
-        <h4 class="header text-center"><strong>Books Name</strong></h4>
+        <h4 class="header text-center"><strong>{{ book?.book_name }}</strong></h4>
         <q-page class="q-gutter-sm">
           <bookInfoComponent
+          :book="book"
           />
-          <q-btn label="Borrow" color="positive" icon="check"/>
+          <q-btn label="Borrow" color="positive" icon="check" @click="handleBorrowBook"/>
           <q-btn label="Goback" color="negative" icon="arrow_back" @click="goBack"/>
         </q-page>
       </q-card-section>
@@ -17,12 +18,61 @@
   </template>
   
   <script setup lang="ts">
+  import {ref,onMounted} from 'vue'
   import bookInfoComponent from '../components/card/bookInfoComponent.vue';
-  import { useRouter } from 'vue-router';
+  import { useRouter,useRoute } from 'vue-router';
+  import {borrowBook, getBook} from 'src/services/api.services'
+import { BooksDataT } from 'src/components/models';
+import { useQuasar } from 'quasar';
+
   const router = useRouter()
+  const $q = useQuasar()
+  const route = useRoute()
+  const uniqueID = route.params.unique
+  const book = ref<BooksDataT>({
+    id:0,
+    book_unique_id:'',
+    book_image:'',
+    book_name:'',
+    book_desc:'',
+    author:'',
+    date_published:'',
+    genre:'',
+    initial_quantity:0,
+    total_quantity:0
+  })
+  
+  const getData =async () => {
+    await getBook(
+      {params:{
+        book_unique_id:uniqueID
+      }
+    }).then(response =>{
+      book.value = response.data.book
+    }).catch(err => {
+      console.log(err)
+    })
+  }
 
   const goBack = ()=>{
     router.push('/')
+  }
+  onMounted(()=>{
+    getData()
+  })
+
+  const handleBorrowBook = async()=>{
+    await borrowBook({book_id:uniqueID}).then(response =>{
+      $q.notify({
+          type:'positive',
+          message:response.data.message
+          })
+    }).catch(err => {
+      $q.notify({
+          type:'negative',
+          message:err.response.data.message
+          })
+    })
   }
   </script>
   
